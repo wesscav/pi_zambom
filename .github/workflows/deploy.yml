@@ -46,13 +46,6 @@ jobs:
           docker stop pi_zambom || true
           docker rm -f pi_zambom || true
 
-          docker pull wesleyalves00/pi_zambom:${{ github.sha }}
-
-          docker run -d \
-            -p 80:8000 \
-            -e MONGO_URI=${{ secrets.MONGO_URI }} \
-            -e MONGO_DB=${{ secrets.MONGO_DB }} \
-            -e USERS_API_URL=${{ secrets.USERS_API_URL }} \
-            --network=rede \
-            --name pi_zambom \
-            wesleyalves00/pi_zambom:${{ github.sha }}
+          IMAGE=wesleyalves00/pi_zambom:${{ github.sha }}
+          docker pull $IMAGE
+          docker run -d -p 80:8000 -e MONGO_URI=${{ secrets.MONGO_URI }} -e MONGO_DB=${{ secrets.MONGO_DB }} -e USERS_API_URL=${{ secrets.USERS_API_URL }} --network=rede --name pi_zambom $IMAGE
