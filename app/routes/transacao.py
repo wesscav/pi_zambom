@@ -15,9 +15,10 @@ USERS_API_URL = os.getenv("USERS_API_URL", "http://18.228.48.67")
 router = APIRouter(prefix="/transacao", tags=["Transações"])
 
 def serialize(doc):
-    doc["id"] = str(doc["_id"])
+    doc["id"] = str(doc["_id"] )
     del doc["_id"]
     return doc
+    
 
 
 @router.get("", response_model=list[TransacaoResponse])
