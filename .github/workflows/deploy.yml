@@ -53,15 +53,15 @@ jobs:
           docker image prune -a -f
 
           # Pull da nova imagem
-          IMAGE=wesleyalves00/pi_zambom:${{ github.sha }}
-          docker pull $IMAGE
+          IMAGE="wesleyalves00/pi_zambom:${{ github.sha }}"
+          docker pull "$IMAGE"
 
           # Sobe o novo container
           docker run -d \
             -p 80:8000 \
-            -e MONGO_URI=${{ secrets.MONGO_URI }} \
-            -e MONGO_DB=${{ secrets.MONGO_DB }} \
-            -e USERS_API_URL=${{ secrets.USERS_API_URL }} \
+            -e "MONGO_URI=${{ secrets.MONGO_URI }}" \
+            -e "MONGO_DB=${{ secrets.MONGO_DB }}" \
+            -e "USERS_API_URL=${{ secrets.USERS_API_URL }}" \
             --network=rede \
             --name pi_zambom \
-            $IMAGE
+            "$IMAGE"
