@@ -18,7 +18,7 @@ def serialize(doc):
     doc["id"] = str(doc["_id"] )
     del doc["_id"]
     return doc
-    
+
 
 
 @router.get("", response_model=list[TransacaoResponse])
@@ -72,6 +72,7 @@ async def criar_transacao(transacao: TransacaoCreate):
         "valor_total": valor_total,
         "data_transacao": transacao.data_transacao.isoformat(),
     }
+
 
     resultado = await transacoes_collection.insert_one(doc)
     doc["id"] = str(resultado.inserted_id)
