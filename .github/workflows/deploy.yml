@@ -3,8 +3,6 @@ name: Deploy
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 permissions:
   contents: read
@@ -41,9 +39,29 @@ jobs:
         key: ${{ secrets.KEY_TEST }}
         port: 22
         script: |
+          # Garante que a rede existe
+          docker network create rede || true
+
+          # Conecta o mongo na rede caso ainda não esteja
+          docker network connect rede mongo || true
+
+          # Para e remove o container antigo
           docker stop pi_zambom || true
           docker rm -f pi_zambom || true
 
+          # Limpa imagens antigas para liberar espaço
+          docker image prune -a -f
+
+          # Pull da nova imagem
           IMAGE=wesleyalves00/pi_zambom:${{ github.sha }}
           docker pull $IMAGE
-          docker run -d -p 80:8000 -e MONGO_URI=${{ secrets.MONGO_URI }} -e MONGO_DB=${{ secrets.MONGO_DB }} -e USERS_API_URL=${{ secrets.USERS_API_URL }} --network=rede --name pi_zambom $IMAGE
+
+          # Sobe o novo container
+          docker run -d \
+            -p 80:8000 \
+            -e MONGO_URI=${{ secrets.MONGO_URI }} \
+            -e MONGO_DB=${{ secrets.MONGO_DB }} \
+            -e USERS_API_URL=${{ secrets.USERS_API_URL }} \
+            --network=rede \
+            --name pi_zambom \
+            $IMAGE
