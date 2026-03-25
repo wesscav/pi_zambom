@@ -1,0 +1,58 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: "wesleyalves00"
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: wesleyalves00/pi_zambom:${{ github.sha }}
+
+    - name: Deploy na EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST_TEST }}
+        username: "ubuntu"
+        key: ${{ secrets.KEY_TEST }}
+        port: 22
+        script: |
+          docker stop pi_zambom || true
+          docker rm -f pi_zambom || true
+
+          docker image prune -a -f
+
+          docker pull wesleyalves00/pi_zambom:${{ github.sha }}
+
+          docker run -d \
+            -p 80:8000 \
+            -e MONGO_URI=${{ secrets.MONGO_URI }} \
+            -e MONGO_DB=${{ secrets.MONGO_DB }} \
+            -e USERS_API_URL=${{ secrets.USERS_API_URL }} \
+            --network=rede \
+            --name pi_zambom \
+            wesleyalves00/pi_zambom:${{ github.sha }}
