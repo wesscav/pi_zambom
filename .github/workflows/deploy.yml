@@ -46,8 +46,6 @@ jobs:
           docker stop pi_zambom || true
           docker rm -f pi_zambom || true
 
-          docker image prune -a -f
-
           docker pull wesleyalves00/pi_zambom:${{ github.sha }}
 
           docker run -d \
